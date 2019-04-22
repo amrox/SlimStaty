@@ -1,0 +1,73 @@
+package {{ java_package }};
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class {{ statemachine_name }}StateMachine {
+
+    public enum State {
+        {%- for state in states %}
+        {{ state.upper() }},
+        {%- endfor %}
+    }
+
+    public enum Event {
+        {%- for event in events %}
+        {{ event.upper() }},
+        {%- endfor %}
+    }
+
+    public static class Exception extends java.lang.Exception {}
+
+    public interface OnStateChangeListener {
+        void onStateWillChange({{ statemachine_name }}StateMachine stateMachine, {{ statemachine_name }}StateMachine.State newState);
+        void onStateDidChange({{ statemachine_name }}StateMachine stateMachine, {{ statemachine_name }}StateMachine.State newState);
+    }
+
+    public {{ statemachine_name }}StateMachine() {
+    }
+
+    public {{ statemachine_name }}StateMachine(State state) {
+        this.state = state;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public synchronized State fire(Event event) throws Exception {
+        {% for transition in transitions %}
+        /* {{ transition.event }}: {{ transition.from_state }} -> {{ transition.to_state }} */
+        if (event == Event.{{ transition.event.upper() }} && this.state == State.{{ transition.from_state.upper() }}) {
+            return transition(State.{{ transition.to_state.upper() }});
+        }
+        {% endfor %}
+        throw new Exception();
+    }
+
+    private State transition(State state) {
+        for (OnStateChangeListener l: listeners) {
+            if (l != null) {
+                l.onStateWillChange(this, state);
+            }
+        }
+        this.state = state;
+        for (OnStateChangeListener l: listeners) {
+            if (l != null) {
+                l.onStateDidChange(this, state);
+            }
+        }
+        return this.state;
+    }
+
+    public synchronized void addListener(OnStateChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public synchronized void removeListener(OnStateChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    private State state = State.LOCKED;
+    private Set<OnStateChangeListener> listeners = new HashSet<>();
+}
