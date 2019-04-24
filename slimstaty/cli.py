@@ -9,17 +9,13 @@ from .slimstaty import StateMachine
 
 def render_java(state_machine, java_out, java_package):
     import jinja2
-    # p = os.path.join(os.path.dirname(__file__), 'templates', 'java.j2')
 
     from jinja2 import Environment, PackageLoader
     env = Environment(loader=PackageLoader('slimstaty', 'templates'))
     template = env.get_template('java.j2')
     outputText = template.render(
         java_package=java_package,
-        statemachine_name=state_machine.name.title(),
-        states=state_machine.states,
-        events=state_machine.events,
-        transitions=state_machine.transitions)
+        statemachine=state_machine)
     print(outputText)
 
 

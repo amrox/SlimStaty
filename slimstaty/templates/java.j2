@@ -1,3 +1,5 @@
+{% set statemachine_name = statemachine.name.title() -%}
+
 package {{ java_package }};
 
 import java.util.HashSet;
@@ -6,13 +8,13 @@ import java.util.Set;
 public class {{ statemachine_name }}StateMachine {
 
     public enum State {
-        {%- for state in states %}
+        {%- for state in statemachine.states %}
         {{ state.upper() }},
         {%- endfor %}
     }
 
     public enum Event {
-        {%- for event in events %}
+        {%- for event in statemachine.events %}
         {{ event.upper() }},
         {%- endfor %}
     }
@@ -36,7 +38,7 @@ public class {{ statemachine_name }}StateMachine {
     }
 
     public synchronized State fire(Event event) throws Exception {
-        {% for transition in transitions %}
+        {% for transition in statemachine.transitions %}
         /* {{ transition.event }}: {{ transition.from_state }} -> {{ transition.to_state }} */
         if (event == Event.{{ transition.event.upper() }} && this.state == State.{{ transition.from_state.upper() }}) {
             return transition(State.{{ transition.to_state.upper() }});
