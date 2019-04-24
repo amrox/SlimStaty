@@ -7,15 +7,15 @@ import os
 from .slimstaty import StateMachine
 
 
-def render_java(state_machine, java_out, java_package):
+def render(state_machine: StateMachine, out_dirpath, **kwargs):
     import jinja2
 
     from jinja2 import Environment, PackageLoader
     env = Environment(loader=PackageLoader('slimstaty', 'templates'))
-    template = env.get_template('java.j2')
+    template = env.get_template('java.j2')  # TODO: fix
     outputText = template.render(
-        java_package=java_package,
-        statemachine=state_machine)
+        statemachine=state_machine,
+        **kwargs)
     print(outputText)
 
 
@@ -30,11 +30,11 @@ def main(statemachine, java_package, java_out, args=None):
     s = StateMachine.from_yaml(statemachine)
     if java_out:
         assert java_package
-
-        render_java(s, java_out, java_package)
+        render(s, java_out, java_package=java_package)
 
     return 0
 
 
 if __name__ == "__main__":
+    # pylint: disable=no-value-for-parameter
     sys.exit(main())  # pragma: no cover
