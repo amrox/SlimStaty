@@ -2,5 +2,15 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pep8Enabled": true,
     "python.pythonPath": ".venv/bin/python3",
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pyTestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true
 }
