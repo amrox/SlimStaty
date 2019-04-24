@@ -7,10 +7,9 @@ import os
 from .slimstaty import StateMachine
 
 
-
 def render_java(state_machine, java_out, java_package):
     import jinja2
-    p = os.path.join(os.path.dirname(__file__), 'templates', 'java.j2')
+    # p = os.path.join(os.path.dirname(__file__), 'templates', 'java.j2')
 
     from jinja2 import Environment, PackageLoader
     env = Environment(loader=PackageLoader('slimstaty', 'templates'))
@@ -22,13 +21,11 @@ def render_java(state_machine, java_out, java_package):
         events=state_machine.events,
         transitions=state_machine.transitions)
     print(outputText)
-    
-
-
 
 
 @click.command()
-@click.option('--statemachine', help='State Machine Definition (yaml).', required=True)
+@click.option('--statemachine', help='State Machine Definition (yaml).',
+              required=True)
 @click.option('--java-package', help='Java package name.')
 @click.option('--java-out', help='Java output root.')
 def main(statemachine, java_package, java_out, args=None):
@@ -40,7 +37,6 @@ def main(statemachine, java_package, java_out, args=None):
 
         render_java(s, java_out, java_package)
 
-    
     return 0
 
 
