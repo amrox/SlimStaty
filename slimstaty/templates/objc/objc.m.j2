@@ -1,0 +1,59 @@
+{% extends "objc/objc.j2" %}
+{% block content %}
+
+#import "{{ statemachine_class }}.h"
+
+@interface {{ statemachine_class}} ()
+@property (readwrite) {{ statemachine_state }} state;
+@end
+
+
+@implementation {{ statemachine_class }}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        // TODO: set initial state?
+        // _state = 0;
+    }
+    return self;
+}
+
+- (instancetype)initWithState:({{ statemachine_state}})state
+{
+    self = [super init];
+    if (self) {
+        _state = state;
+    }
+    return self;
+}
+
+- ({{ statemachine_state }})fire:({{ statemachine_event }})event error:(NSError *_Nullable *_Nullable)outError
+{
+    {% for transition in statemachine.transitions %}
+    /* {{ transition.event }}: {{ transition.from_state }} -> {{ transition.to_state }} */
+    if (event == {{ statemachine_name }}Event{{ transition.event.title() }} && this.state == {{ statemachine_name }}State{{ transition.from_state.title() }}) {
+        return transition({{ statemachine_name}}State{{ transition.to_state.title() }});
+    }
+    {% endfor %}
+
+    if (outError != NULL) {
+        // TODO: better error
+        *outError = [[NSError alloc] initWithDomain:@"co.mrox" code:1 userInfo:nil];
+    }
+
+    return self.state;
+}
+
+- ({{ statemachine_state }})_transitionToState:({{ statemachine_state }})state {
+    [self.delegate {{ statemachine.name }}StateMachine:self willTransitionToState:state];
+    self.state = state;
+    [self.delegate {{ statemachine.name}}StateMachine:self didTransitionToState:state];
+    return self.state;
+}
+
+
+@end
+
+{% endblock %}

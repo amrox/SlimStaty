@@ -4,19 +4,8 @@
 import sys
 import click
 import os
-from .slimstaty import StateMachine
-
-
-def render(state_machine: StateMachine, out_dirpath, **kwargs):
-    import jinja2
-
-    from jinja2 import Environment, PackageLoader
-    env = Environment(loader=PackageLoader('slimstaty', 'templates'))
-    template = env.get_template('java.j2')  # TODO: fix
-    outputText = template.render(
-        statemachine=state_machine,
-        **kwargs)
-    print(outputText)
+from jinja2 import Environment, PackageLoader, Template
+from .slimstaty import StateMachine, render
 
 
 @click.command()
@@ -24,13 +13,51 @@ def render(state_machine: StateMachine, out_dirpath, **kwargs):
               required=True)
 @click.option('--java-package', help='Java package name.')
 @click.option('--java-out', help='Java output root.')
-def main(statemachine, java_package, java_out, args=None):
+@click.option('--objc-out', help='Objective-C output root.')
+@click.option('--objc-prefix', help='Objective-C prefix.')
+def main(statemachine, java_package, java_out, objc_out, objc_prefix, args=None):
     """Slim State Machine Generator"""
 
-    s = StateMachine.from_yaml(statemachine)
+    sm = StateMachine.from_yaml(statemachine)
+    env = Environment(loader=PackageLoader('slimstaty', 'templates'))
+
     if java_out:
         assert java_package
-        render(s, java_out, java_package=java_package)
+
+        if not os.path.exists(java_out):
+            os.makedirs(java_out)
+
+        template = env.get_template('java/java.j2')
+        out = render(state_machine=sm, template=template,
+                     java_package=java_package)
+
+        filename = f'{sm.name.title()}.java'
+        path = os.path.join(java_out, filename)
+        with open(path, 'w') as f:
+            f.write(out)
+
+    if objc_out:
+        if not os.path.exists(objc_out):
+            os.makedirs(objc_out)
+
+        template = env.get_template('objc/objc.h.j2')
+        out = render(state_machine=sm, template=template,
+                     objc_prefix=objc_prefix)
+
+
+        filename = f'{sm.name.title()}.h'
+        path = os.path.join(java_out, filename)
+        with open(path, 'w') as f:
+            f.write(out)
+
+        template = env.get_template('objc/objc.m.j2')
+        out = render(state_machine=sm, template=template,
+                     objc_prefix=objc_prefix)
+
+        filename = f'{sm.name.title()}.m'
+        path = os.path.join(java_out, filename)
+        with open(path, 'w') as f:
+            f.write(out)
 
     return 0
 

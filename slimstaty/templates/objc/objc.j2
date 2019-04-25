@@ -1,0 +1,8 @@
+{% set statemachine_name     = (objc_prefix or "") + statemachine.name.title() -%}
+{% set statemachine_class    = statemachine_name + "StateMachine" -%}
+{% set statemachine_delegate = statemachine_class + "Delegate" -%}
+{% set statemachine_state    = statemachine_name + "State" -%}
+{% set statemachine_event    = statemachine_name + "Event" -%}
+
+{% block content %}
+{% endblock %}

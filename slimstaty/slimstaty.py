@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import List, Set
 import yaml
+from jinja2 import Template
 
 """Main module."""
 
@@ -66,3 +67,11 @@ class StateMachine(object):
 
             except yaml.YAMLError as exc:
                 print(exc)
+
+
+def render(state_machine: StateMachine=None, template: Template=None,
+           **kwargs) -> str:
+    assert state_machine
+    assert template
+
+    return template.render(statemachine=state_machine, **kwargs)

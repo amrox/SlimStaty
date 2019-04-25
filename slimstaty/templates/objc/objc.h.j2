@@ -1,0 +1,49 @@
+{% extends "objc/objc.j2" %}
+{% block content %}
+
+// TODO: generated header
+#import <Foundation/Foundation.h>
+
+
+typedef enum : NSUInteger {
+
+    {%- for state in statemachine.states %}
+    {{ statemachine_state}}{{ state.title() }}
+    {%- endfor %}
+} {{ statemachine_state }};
+
+typedef enum : NSUInteger {
+    {%- for state in statemachine.events %}
+    {{ statemachine_event}}{{ state.title() }}
+    {%- endfor %}
+} {{ statemachine_event }};
+
+
+@protocol {{ statemachine_delegate }}
+
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface {{ statemachine_class }}: NSObject
+
+@property (readonly) {{ statemachine_state }} state;
+
+@property (nonatomic, weak, nullable) id<{{ statemachine_delegate }}> delegate;
+
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithState:({{ statemachine_state }})state NS_DESIGNATED_INITIALIZER;
+
+- ({{ statemachine_state }})fire:({{ statemachine_event }})event error:(NSError *_Nullable *_Nullable)outError;
+
+@end
+
+
+@protocol {{ statemachine_delegate }} <NSObject>
+
+- (void){{ statemachine.name }}StateMachine:({{ statemachine_class }} *)stateMachine willTransitionToState:({{ statemachine_state }})state;
+- (void){{ statemachine.name }}StateMachine:({{ statemachine_class }} *)stateMachine didTransitionToState:({{ statemachine_state }})state;
+
+@end
+
+NS_ASSUME_NONNULL_END
+{% endblock %}
