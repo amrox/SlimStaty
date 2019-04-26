@@ -14,8 +14,10 @@ from .slimstaty import StateMachine, render
 @click.option('--java-package', help='Java package name.')
 @click.option('--java-out', help='Java output root.')
 @click.option('--objc-out', help='Objective-C output root.')
-@click.option('--objc-prefix', help='Objective-C prefix.')
-def main(statemachine, java_package, java_out, objc_out, objc_prefix, args=None):
+@click.option('--objc-prefix', help='Objective-C prefix.', default="")
+def main(statemachine,
+         java_package, java_out,
+         objc_out, objc_prefix, args=None):
     """Slim State Machine Generator"""
 
     sm = StateMachine.from_yaml(statemachine)
@@ -40,21 +42,25 @@ def main(statemachine, java_package, java_out, objc_out, objc_prefix, args=None)
         if not os.path.exists(objc_out):
             os.makedirs(objc_out)
 
+        statemachine_name = sm.name.title() + "StateMachine"
+        statemachine_fname = objc_prefix + statemachine_name
+
         template = env.get_template('objc/objc.h.j2')
         out = render(state_machine=sm, template=template,
+                     statemachine_name=statemachine_name,
                      objc_prefix=objc_prefix)
 
-
-        filename = f'{sm.name.title()}.h'
+        filename = f'{statemachine_fname}.h'
         path = os.path.join(java_out, filename)
         with open(path, 'w') as f:
             f.write(out)
 
         template = env.get_template('objc/objc.m.j2')
         out = render(state_machine=sm, template=template,
+                     statemachine_name=statemachine_name,
                      objc_prefix=objc_prefix)
 
-        filename = f'{sm.name.title()}.m'
+        filename = f'{statemachine_fname}.m'
         path = os.path.join(java_out, filename)
         with open(path, 'w') as f:
             f.write(out)

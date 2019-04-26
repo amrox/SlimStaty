@@ -1,14 +1,15 @@
 {% extends "objc/objc.j2" %}
-{% block content %}
+{%- block content -%}
 
-#import "{{ statemachine_class }}.h"
+#import "{{ objc_class }}.h"
 
-@interface {{ statemachine_class}} ()
-@property (readwrite) {{ statemachine_state }} state;
+
+@interface {{ objc_class}} ()
+@property (readwrite) {{ objc_state }} state;
 @end
 
 
-@implementation {{ statemachine_class }}
+@implementation {{ objc_class }}
 
 - (instancetype)init
 {
@@ -20,7 +21,7 @@
     return self;
 }
 
-- (instancetype)initWithState:({{ statemachine_state}})state
+- (instancetype)initWithState:({{ objc_state }})state
 {
     self = [super init];
     if (self) {
@@ -29,14 +30,14 @@
     return self;
 }
 
-- ({{ statemachine_state }})fire:({{ statemachine_event }})event error:(NSError *_Nullable *_Nullable)outError
+- ({{ objc_state }})fire:({{ objc_event }})event error:(NSError *_Nullable *_Nullable)outError
 {
-    {% for transition in statemachine.transitions %}
+    {% for transition in statemachine.transitions -%}
     /* {{ transition.event }}: {{ transition.from_state }} -> {{ transition.to_state }} */
-    if (event == {{ statemachine_name }}Event{{ transition.event.title() }} && this.state == {{ statemachine_name }}State{{ transition.from_state.title() }}) {
-        return transition({{ statemachine_name}}State{{ transition.to_state.title() }});
+    if (event == {{ objc_prefix + statemachine_name }}Event{{ transition.event.title() }} && self.state == {{ objc_prefix + statemachine_name }}State{{ transition.from_state.title() }}) {
+        return [self _transitionToState:{{ objc_prefix + statemachine_name}}State{{ transition.to_state.title() }}];
     }
-    {% endfor %}
+    {% endfor -%}
 
     if (outError != NULL) {
         // TODO: better error
@@ -46,7 +47,8 @@
     return self.state;
 }
 
-- ({{ statemachine_state }})_transitionToState:({{ statemachine_state }})state {
+- ({{ objc_state }})_transitionToState:({{ objc_state }})state
+{
     [self.delegate {{ statemachine.name }}StateMachine:self willTransitionToState:state];
     self.state = state;
     [self.delegate {{ statemachine.name}}StateMachine:self didTransitionToState:state];
@@ -55,5 +57,4 @@
 
 
 @end
-
 {% endblock %}

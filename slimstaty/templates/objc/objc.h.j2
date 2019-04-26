@@ -5,43 +5,44 @@
 #import <Foundation/Foundation.h>
 
 
-typedef enum : NSUInteger {
-
+typedef NS_ENUM(NSUInteger, {{ objc_state }}) {
     {%- for state in statemachine.states %}
-    {{ statemachine_state}}{{ state.title() }}
+    {{ objc_state }}{{ state.title() }},
     {%- endfor %}
-} {{ statemachine_state }};
+} NS_SWIFT_NAME({{ swift_state }});
 
-typedef enum : NSUInteger {
-    {%- for state in statemachine.events %}
-    {{ statemachine_event}}{{ state.title() }}
+
+typedef NS_ENUM(NSUInteger, {{ objc_event }}) {
+    {%- for event in statemachine.events %}
+    {{ objc_event}}{{ event.title() }},
     {%- endfor %}
-} {{ statemachine_event }};
+} NS_SWIFT_NAME({{ swift_event }});
 
-
-@protocol {{ statemachine_delegate }}
+@protocol {{ objc_delegate }};
 
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface {{ statemachine_class }}: NSObject
+NS_SWIFT_NAME({{ swift_class }})
+@interface {{ objc_class }} : NSObject
 
-@property (readonly) {{ statemachine_state }} state;
+@property (readonly) {{ objc_state }} state;
 
-@property (nonatomic, weak, nullable) id<{{ statemachine_delegate }}> delegate;
+@property (nonatomic, weak, nullable) id<{{ objc_delegate }}> delegate;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWithState:({{ statemachine_state }})state NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithState:({{ objc_state }})state NS_DESIGNATED_INITIALIZER;
 
-- ({{ statemachine_state }})fire:({{ statemachine_event }})event error:(NSError *_Nullable *_Nullable)outError;
+- ({{ objc_state }})fire:({{ objc_event }})event error:(NSError *_Nullable *_Nullable)outError;
 
 @end
 
 
-@protocol {{ statemachine_delegate }} <NSObject>
+NS_SWIFT_NAME({{ swift_delegate }})
+@protocol {{ objc_delegate }} <NSObject>
 
-- (void){{ statemachine.name }}StateMachine:({{ statemachine_class }} *)stateMachine willTransitionToState:({{ statemachine_state }})state;
-- (void){{ statemachine.name }}StateMachine:({{ statemachine_class }} *)stateMachine didTransitionToState:({{ statemachine_state }})state;
+- (void){{ statemachine.name }}StateMachine:({{ objc_class }} *)stateMachine willTransitionToState:({{ objc_state }})state;
+- (void){{ statemachine.name }}StateMachine:({{ objc_class }} *)stateMachine didTransitionToState:({{ objc_state }})state;
 
 @end
 
