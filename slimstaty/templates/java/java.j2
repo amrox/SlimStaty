@@ -1,50 +1,84 @@
-{% set statemachine_name = statemachine.name.title() -%}
+{%- if access_specifier|length > 0 %}
+{%   set access_specifier = access_specifier + " " %}
+{% endif -%}
 
 package {{ java_package }};
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class {{ statemachine_name }}StateMachine {
+{{ access_specifier -}}
+class {{ class_name }} {
 
-    public enum State {
-        {%- for state in statemachine.states %}
-        {{ state.upper() }},
-        {%- endfor %}
+    {{ access_specifier -}}
+    enum State {
+        {% for state in statemachine.states %}
+        /**
+          * State: {{ state }}
+          */
+        {{ state_names[state] }},
+        {% endfor %}
     }
 
-    public enum Event {
-        {%- for event in statemachine.events %}
-        {{ event.upper() }},
-        {%- endfor %}
+    {{ access_specifier -}}
+    enum Event {
+        {% for event in statemachine.events|sort %}
+        /**
+          * Event: {{ event }}
+          */
+        {{ event_names[event] }},
+        {% endfor %}
     }
 
-    public static class Exception extends java.lang.Exception {}
+    {{ access_specifier -}}
+    static class Exception extends java.lang.Exception {}
 
-    public interface OnStateChangeListener {
-        void onStateWillChange({{ statemachine_name }}StateMachine stateMachine, {{ statemachine_name }}StateMachine.State newState);
-        void onStateDidChange({{ statemachine_name }}StateMachine stateMachine, {{ statemachine_name }}StateMachine.State newState);
+    {{ access_specifier -}}
+    interface OnStateChangeListener {
+        void onStateWillChange({{ class_name }} stateMachine, {{ class_name }}.State newState);
+        void onStateDidChange({{ class_name }} stateMachine, {{ class_name }}.State newState);
     }
 
-    public {{ statemachine_name }}StateMachine() {
+    {{ access_specifier -}}
+    {{ class_name }}() {
     }
 
-    public {{ statemachine_name }}StateMachine(State state) {
+    {{ access_specifier -}}
+    {{ class_name }}(State state) {
         this.state = state;
     }
 
-    public State getState() {
+    {{ access_specifier -}}
+    State getState() {
         return state;
     }
 
-    public synchronized State fire(Event event) throws Exception {
-        {% for transition in statemachine.transitions %}
-        /* {{ transition.event }}: {{ transition.from_state }} -> {{ transition.to_state }} */
-        if (event == Event.{{ transition.event.upper() }} && this.state == State.{{ transition.from_state.upper() }}) {
-            return transition(State.{{ transition.to_state.upper() }});
+    {{ access_specifier -}}
+    synchronized State fire(Event event) throws Exception {
+
+        /* Reset Events */
+        {% for reset_event in statemachine.reset_events %}
+        if (event == Event.{{ event_names[reset_event] }}) {
+            return transition(State.{{ state_names[statemachine.states[0]] }});
         }
         {% endfor %}
-        throw new Exception();
+
+        /* Normal Events */
+        switch(state) {
+        {% for state in statemachine.states %}
+            case {{ state_names[state] }}: /* {{ state }} */
+                switch(event) {
+                {% for transition in statemachine.transitions %}
+                {% if transition.from_state == state %}
+                    case {{ event_names[transition.event] }}: /* on {{ transition.event }}  */
+                        return transition(State.{{ state_names[transition.to_state] }}); /* -> {{ transition.to_state }} */
+                {% endif %}
+                {% endfor %}
+                }
+        {% endfor %}
+        }
+
+       throw new Exception();
     }
 
     private State transition(State state) {
@@ -62,14 +96,16 @@ public class {{ statemachine_name }}StateMachine {
         return this.state;
     }
 
-    public synchronized void addListener(OnStateChangeListener listener) {
+    {{ access_specifier -}}
+    synchronized void addListener(OnStateChangeListener listener) {
         listeners.add(listener);
     }
 
-    public synchronized void removeListener(OnStateChangeListener listener) {
+    {{ access_specifier -}}
+    synchronized void removeListener(OnStateChangeListener listener) {
         listeners.remove(listener);
     }
 
-    private State state = State.LOCKED;
+    private State state = State.{{ state_names[statemachine.states[0]] }};
     private Set<OnStateChangeListener> listeners = new HashSet<>();
 }
