@@ -20,7 +20,7 @@ SlimStaty is a toy project to generate state machine implementations from a YAML
   name: "turnstile"
   events:
     - { name: coin, from: locked, to: unlocked }
-    - { name: push, from: unlocked, to: locked}
+    - { name: push, from: unlocked, to: locked }
 
 
 Into Java and Objective-C, currently.  Very much a work in progress.
