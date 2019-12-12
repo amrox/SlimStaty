@@ -15,18 +15,21 @@ SlimStaty
 
 
 
+SlimStaty is a toy project to generate state machine implementations from a YAML representation:
 
-Python Boilerplate contains all the boilerplate you need to create a Python package.
+| statemachine:
+|  name: "turnstile"
+|  events:
+|    - { name: coin, from: locked, to: unlocked }
+|    - { name: push, from: unlocked, to: locked}
 
+
+Into Java and Objective-C, currently.  Very much a work in progress.
 
 * Free software: MIT license
 * Documentation: https://slimstaty.readthedocs.io.
 
 
-Features
---------
-
-* TODO
 
 Credits
 -------
